@@ -14,4 +14,16 @@ public class MinecraftMixin {
             return KeepMsgStorage.lastMessage;
         return input;
     }
+
+    @ModifyArg(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;openChatScreen(Ljava/lang/String;)V", ordinal = 1))
+    private String modifyInitialInputForCommand(String input) {
+        if (KeepMsgStorage.lastMessage != null) {
+            if (KeepMsgStorage.lastMessage.startsWith("/")) {
+                return KeepMsgStorage.lastMessage;
+            } else {
+                KeepMsgStorage.lastMessage = null;
+            }
+        }
+        return input;
+    }
 }

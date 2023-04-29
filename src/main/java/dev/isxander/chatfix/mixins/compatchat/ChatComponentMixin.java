@@ -26,44 +26,47 @@ public class ChatComponentMixin {
     @Shadow @Final private List<GuiMessage> allMessages;
     @Shadow @Final private List<GuiMessage.Line> trimmedMessages;
 
-    @Unique private boolean replacingMessage = false;
     @Unique private final Map<GuiMessage, Collection<GuiMessage.Line>> messageToLines = new HashMap<>();
 
     @ModifyVariable(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private Component changeAddedMessage(Component message, Component dontuse, @Nullable MessageSignature signature, int ticks, @Nullable GuiMessageTag tag, boolean refresh) {
-        if (replacingMessage) {
-            replacingMessage = false;
-            return message;
-        }
-
         if (allMessages.isEmpty())
             return message;
 
         var iterator = allMessages.listIterator();
-        int maxLookBack = 1;
-        int i = 0;
-        int duplicated = -1;
-        while (iterator.hasNext() && i < maxLookBack) {
+        int duplicated = -1; // how many times this msg was duplicated
+        for (int i = 0; i < 1 && iterator.hasNext(); i++) {
             var msg = iterator.next();
             var content = msg.content();
             int duplicate = 1;
+
+            // duplicate component is custom component that stores the actual content, the formatted message, and the duplicate count
             if (content instanceof DuplicateComponent duplicateComponent) {
                 content = duplicateComponent.getActualContent();
                 duplicate = duplicateComponent.getDuplicateCount();
             }
-            if (content.getString().equals(message.getString()) && content.getStyle().equals(message.getStyle())) {
-                if (Objects.equals(msg.tag(), tag)) {
-                    messageToLines.remove(msg).forEach(line -> trimmedMessages.remove(line));
-                    iterator.remove();
-                    duplicated = duplicate + 1;
-                    break;
-                }
+
+            // if components are equal
+            if (content.getString().equals(message.getString())
+                    && content.getStyle().equals(message.getStyle())
+                    && Objects.equals(msg.tag(), tag)
+            ) {
+                // remove all lines associated with the message
+                messageToLines.remove(msg).forEach(line -> trimmedMessages.remove(line));
+                // remove the message itself
+                iterator.remove();
+                // increment duplicate count
+                duplicated = duplicate + 1;
+                break;
             }
-            maxLookBack++;
         }
 
         if (duplicated != -1)
-            return DuplicateComponent.create(message.copy().append(" ").append(Component.literal("(%s)".formatted(duplicated)).withStyle(ChatFormatting.GRAY)), message, duplicated);
+            return DuplicateComponent.create(
+                    message.copy().append(" ").append(Component.literal("(%s)".formatted(duplicated)).withStyle(ChatFormatting.GRAY)),
+                    message,
+                    duplicated
+            );
         return message;
     }
 
