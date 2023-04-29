@@ -1,0 +1,24 @@
+{
+  "chatfix.title": "Chat Fix",
+
+  "chatfix.opt.dont_clear_history": "Don't Clear Chat History",
+  "chatfix.opt.dont_clear_history.tooltip": "Prevents the chat history from being cleared when you change worlds.",
+
+  "chatfix.opt.compactchat": "Compact Chat",
+  "chatfix.opt.compactchat.tooltip": "Compacts duplicate messages into a single message.",
+  "chatfix.opt.compactchat.warning": "This prevents the use of chat reporting, as it invalidates message signatures due to the removal of messages.",
+  "chatfix.opt.compactchat.only_last": "Only last message",
+
+  "chatfix.opt.keep_message": "Keep Interupted Message",
+  "chatfix.opt.keep_message.tooltip": "Keeps the message you were typing saved for next time, for example, you are killed or a server opens up a GUI.",
+
+  "chatfix.opt.chat_history_length": "Chat Storage Length",
+  "chatfix.opt.chat_history_length.tooltip": "The number of messages to keep in the chat menu (when you scroll up).",
+
+  "chatfix.opt.y_offset": "Chat Y Offset",
+  "chatfix.opt.y_offset.tooltip": "Offsets the chat up or down by this many pixels.",
+  "chatfix.vanilla": "Vanilla",
+  "chatfix.opt.y_offset.default": "Above Armor Bar",
+
+  "chatfix.format.pixels": "%s pixels"
+}

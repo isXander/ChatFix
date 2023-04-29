@@ -3,6 +3,7 @@ package dev.isxander.chatfix.mixins.compatchat;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import dev.isxander.chatfix.config.ChatFixConfig;
 import dev.isxander.chatfix.util.DuplicateComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.GuiMessage;
@@ -30,12 +31,12 @@ public class ChatComponentMixin {
 
     @ModifyVariable(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private Component changeAddedMessage(Component message, Component dontuse, @Nullable MessageSignature signature, int ticks, @Nullable GuiMessageTag tag, boolean refresh) {
-        if (allMessages.isEmpty())
+        if (allMessages.isEmpty() || !isCompatChatEnabled())
             return message;
 
         var iterator = allMessages.listIterator();
         int duplicated = -1; // how many times this msg was duplicated
-        for (int i = 0; i < 1 && iterator.hasNext(); i++) {
+        for (int i = 0; i < ChatFixConfig.INSTANCE.getConfig().compactChat && iterator.hasNext(); i++) {
             var msg = iterator.next();
             var content = msg.content();
             int duplicate = 1;
@@ -72,6 +73,9 @@ public class ChatComponentMixin {
 
     @ModifyArg(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", ordinal = 0))
     private Object hookMessageLineAdd(Object line, @Share("lines") LocalRef<List<GuiMessage.Line>> linesRef) {
+        if (!isCompatChatEnabled())
+            return line;
+
         if (linesRef.get() == null)
             linesRef.set(new ArrayList<>());
         linesRef.get().add((GuiMessage.Line) line);
@@ -80,13 +84,19 @@ public class ChatComponentMixin {
 
     @ModifyArg(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V", ordinal = 1))
     private Object hookMessageAdd(Object message, @Share("lines") LocalRef<List<GuiMessage.Line>> linesRef) {
-        messageToLines.put((GuiMessage) message, linesRef.get());
+        if (isCompatChatEnabled())
+            messageToLines.put((GuiMessage) message, linesRef.get());
         return message;
     }
 
     @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;ILnet/minecraft/client/GuiMessageTag;Z)V", at = @At(value = "INVOKE", target = "Ljava/util/List;remove(I)Ljava/lang/Object;", ordinal = 1))
     private Object removeMessageToLineCache(Object message) {
-        messageToLines.remove((GuiMessage) message);
+        if (isCompatChatEnabled())
+            messageToLines.remove((GuiMessage) message);
         return message;
+    }
+
+    private boolean isCompatChatEnabled() {
+        return ChatFixConfig.INSTANCE.getConfig().compactChat > 0;
     }
 }

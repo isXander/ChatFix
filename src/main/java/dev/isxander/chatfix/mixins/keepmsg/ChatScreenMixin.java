@@ -1,6 +1,7 @@
 package dev.isxander.chatfix.mixins.keepmsg;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.isxander.chatfix.config.ChatFixConfig;
 import dev.isxander.chatfix.util.KeepMsgStorage;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -18,7 +19,8 @@ public class ChatScreenMixin {
     // Update last message when message is edited
     @Inject(method = "onEdited", at = @At("RETURN"))
     private void onMessageEdited(String message, CallbackInfo ci) {
-        KeepMsgStorage.lastMessage = input.getValue();
+        if (ChatFixConfig.INSTANCE.getConfig().keepMsg)
+            KeepMsgStorage.lastMessage = input.getValue();
     }
 
     // Clear last message when message is sent, the user wanted to do this
