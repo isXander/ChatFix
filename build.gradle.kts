@@ -15,25 +15,9 @@ plugins {
 group = "dev.isxander"
 version = "1.0.0+1.19.4"
 
-/* UNCOMMENT OR DELETE IF YOU WANT TESTMOD SOURCESET
-val testmod by sourceSets.registering {
-    compileClasspath += sourceSets.main.get().compileClasspath
-    runtimeClasspath += sourceSets.main.get().runtimeClasspath
-}
-
 loom {
-    runs {
-        register("testmod") {
-            client()
-            ideConfigGenerated(true)
-            name("Test Mod")
-            source(testmod.get())
-        }
-    }
-
-    createRemapConfigurations(testmod.get())
+    accessWidenerPath.set(file("src/main/resources/chatfix.accesswidener"))
 }
-*/
 
 repositories {
     mavenCentral()
@@ -60,12 +44,11 @@ dependencies {
     })
     modImplementation(libs.fabric.loader)
 
-//    modImplementation(libs.fabric.api)
-//    listOf(
-//        "fabric-resource-loader-v0,
-//    ).forEach {
-//        modImplementation(fabricApi.module(it, libs.versions.fabric.api.get()))   
-//    }
+    listOf(
+        "fabric-resource-loader-v0",
+    ).forEach {
+        modImplementation(fabricApi.module(it, libs.versions.fabric.api.get()))
+    }
 
     modImplementation(libs.mod.menu)
     modImplementation(libs.yet.another.config.lib)
@@ -74,7 +57,6 @@ dependencies {
         implementation(it)
         annotationProcessor(it)
         include(it)
-        // "clientAnnotationProcessor"(it) // DO NOT FORGET THIS IF SPLIT SOURCEES
     }
     
     

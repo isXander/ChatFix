@@ -18,8 +18,9 @@
 
   },
   "mixins": [
-    "fabric-mod-template.mixins.json"
+    "chat-fix.mixins.json"
   ],
+  "accessWidener": "chatfix.accesswidener",
   "depends": {
     "fabricloader": ">=0.14.0",
     "minecraft": "1.19.x",
